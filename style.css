@@ -1,0 +1,58 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    background: #171717;
+    display: block;
+    margin: auto;
+    max-width: 50em;
+}
+.input div {
+    display: inline-block;
+    width: 8em;
+}
+.input input[type=number], .input input[type=text] {
+    text-align: center;
+    width: inherit;
+}
+#input-reset {
+    float: right;
+}
+.display div {
+    display: inline-block;
+    width: 8em;
+}
+.display p {
+    text-align: center;
+}
+.settings div {
+    vertical-align: top;
+    display: inline-block;
+    width: 12em;
+}
+.settings input[type=number] {
+    width: 2.5em;
+}
+.settings input[type=button] {
+    display: block;
+    font-size: 1.5em;
+    width: 12em;
+    margin: auto;
+}
+.output div {
+    vertical-align: top;
+    margin: 0.125em 0;
+}
+.output-header {
+    font-size: 1.75em;
+}
+.table {
+    display: block;
+    overflow: auto;
+    white-space: nowrap;
+}
+.table-element {
+    display: inline-block;
+}
+.table-content {
+    padding-left: 4px;
+}

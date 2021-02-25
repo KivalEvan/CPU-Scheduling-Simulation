@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="style.css">
+    <title>TSN2101 Assignment - Topic 1</title>
+    <script src="./jquery.min.js"></script>
+  </head>
+  <body>
+    <h1>CPU Scheduling Algorithm Simulation</h1>
+    <div class="input">
+      <div>
+        <span>Offset: </span><input type="button" id="input-offset-sub" value="-"><input type="button" id="input-offset-add" value="+"><br>
+        <label for="input-process">Process:</label><br>
+        <input type="text" class="input" id="input-process" name="input-process" value="" disabled>
+      </div>
+      <div>
+        <label for="input-btime">Burst time:</label><br>
+        <input type="number" class="input" id="input-btime" name="input-btime" min="1" step="1">
+      </div>
+      <div>
+        <label for="input-atime">Arrival time:</label><br>
+        <input type="number" class="input" id="input-atime" name="input-atime" min="0" step="1">
+      </div>
+      <div>
+        <label for="input-priority">Priority:</label><br>
+        <input type="number" class="input" id="input-priority" name="input-priority" min="1" step="1">
+      </div>
+      <div>
+        <input type="button" id="input-add" value="Add Process" disabled>
+      </div>
+      <div>
+        <input type="button" id="input-reset" value="Reset"><br><br>
+        <span>Use Preset:</span><br>
+        <input type="button" id="input-preset-1" value="1"><input type="button" id="input-preset-2" value="2"><input type="button" id="input-preset-3" value="3"><input type="button" id="input-preset-4" value="4"><input type="button" id="input-preset-5" value="5">
+      </div>
+    </div>
+    <hr>
+    <div class="display">
+      <div>
+        <p id="process"></p>
+      </div>
+      <div>
+        <p id="btime"></p>
+      </div>
+      <div>
+        <p id="atime"></p>
+      </div>
+      <div>
+        <p id="priority"></p>
+      </div>
+      <div>
+        <input type="button" id="input-remove" value="Remove" enabled>
+      </div>
+    </div>
+    <hr>
+    <div class="settings">
+      <div>
+        <input type="checkbox" class="settings" id="input-fcfs" name="input-fcfs">
+        <label for="input-fcfs">First-Come First-Served</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-psjf" name="input-psjf">
+        <label for="input-psjf">Preemptive SJF</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-npsjf" name="input-npsjf">
+        <label for="input-npsjf">Non-preemptive SJF</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-rr" name="input-rr">
+        <label for="input-rr">Round Robin</label><br>
+        <label for="input-rr-quantum">Time Quantum:</label>
+        <input type="number" class="input" id="input-rr-quantum" name="input-rr-quantum" min="1" step="1">
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-fcfsp" name="input-fcfsp">
+        <label for="input-fcfsp">First-Come First-Served + Priority</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-pp" name="input-pp">
+        <label for="input-pp">Preemptive Priority</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-npp" name="input-npp">
+        <label for="input-npp">Non-preemptive Priority</label>
+      </div>
+      <div>
+        <input type="checkbox" class="settings" id="input-rrp" name="input-rrp">
+        <label for="input-rrp">Round Robin + Priority</label><br>
+        <label for="input-rrp-quantum">Time Quantum:</label>
+        <input type="number" class="input" id="input-rrp-quantum" name="input-rrp-quantum" min="1" step="1">
+      </div>
+      <input type="button" id="input-simulate" value="Simulate" enabled>
+    </div>
+    <hr>
+    <div class="output"></div>
+    <script src="./index.js" defer></script>
+    <script src="./ui.js" defer></script>
+  </body>
+</html>

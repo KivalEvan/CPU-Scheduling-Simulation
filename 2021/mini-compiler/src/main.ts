@@ -38,6 +38,9 @@ const onTextInput = () => {
     htmlOutputSyntaxTextArea.value = '';
     htmlOutputResultTextArea.value = '';
     htmlCompileMessage.textContent = '';
+    if (!getInput().trim()) {
+        return;
+    }
     let startTime = performance.now();
     try {
         const token = scanner(getInput());
@@ -46,6 +49,7 @@ const onTextInput = () => {
         setSyntaxOutput(ast);
         setResultOutput(ast);
     } catch (e) {
+        console.error(e);
         if (typeof e === 'string') {
             htmlCompileMessage.textContent = e;
         }

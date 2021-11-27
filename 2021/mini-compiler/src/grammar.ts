@@ -45,9 +45,9 @@ FOLLOW(CAT_TALK) = FIRST(CAT_TALK') U FOLLOW(CAT_PURR) U FOLLOW(CAT_HISS)
                  = { m{e}[{o}]w, $ }
 FOLLOW(CAT_TALK') = FOLLOW(CAT_TALK)
                   = { m{e}[{o}]w, $ }
-FOLLOW(CAT_PURR) = FOLLOW(CAT_TALK)
+FOLLOW(CAT_PURR) = FOLLOW(CAT_SPEAK)
                  = { $ }
-FOLLOW(CAT_HISS) = FOLLOW(CAT_TALK)
+FOLLOW(CAT_HISS) = FOLLOW(CAT_SPEAK)
                  = { $ }
 FOLLOW(CAT_MIMIC) = FOLLOW(CAT_SPEAK)
                   = { $ }
@@ -55,14 +55,14 @@ FOLLOW(CAT_MIMIC) = FOLLOW(CAT_SPEAK)
 PARSING TABLE
                 $       ɛ       m{e}[{o}]w      p[u]r{r}        h[i]s{s}        {ke}
 CAT_SPEAK                       CAT_TALK        CAT_PURR        CAT_HISS        CAT_MIMIC
-CAT_TALK                        m{e}[{o}]w
+CAT_TALK        ɛ               m{e}[{o}]w
                                 CAT_TALK'
 CAT_TALK'       ɛ               CAT_TALK
-CAT_PURR                                        p[u]r{r}
+CAT_PURR        ɛ                               p[u]r{r}
                                                 CAT_TALK
-CAT_HISS                                                        h[i]s{s}
+CAT_HISS        ɛ                                               h[i]s{s}
                                                                 CAT_TALK
-CAT_MIMIC                                                                       {ke}
+CAT_MIMIC       ɛ                                                               {ke}
 
 
 TOKEN PATTERN

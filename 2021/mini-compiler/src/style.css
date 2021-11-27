@@ -1,0 +1,31 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #202024;
+    color: #f0f8ff;
+    font-size: 1rem;
+}
+
+main {
+    max-width: 50em;
+    padding: 1em;
+    margin: 0 auto;
+}
+
+.split {
+    display: flex;
+}
+.split div {
+    width: 50%;
+}
+
+textarea {
+    width: 100%;
+    font-size: 1em;
+}

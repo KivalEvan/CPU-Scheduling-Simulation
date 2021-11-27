@@ -1,0 +1,299 @@
+:root {
+    --primary-color: #d8bcdb;
+    --secondary-color: #733064;
+    --tertiary-color: #9f79a8;
+    --primary-alt-color: #cfd8dc;
+    --secondary-alt-color: #7b8d93;
+    --tertiary-alt-color: #a2a9ab;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: stretch;
+    color: #fff;
+    background-color: #333;
+    font-family: Calibri, 'Trebuchet MS', sans-serif;
+    font-size: clamp(0.875rem, 0.4626rem + 1.0309vw + calc(1rem - 16px), 1.125rem);
+}
+
+a {
+    text-decoration: none;
+    color: #4cf;
+    transition: color 0.1s;
+}
+a:hover {
+    color: #f88;
+}
+
+header,
+footer {
+    display: flex;
+    flex-direction: column;
+    min-height: 4em;
+    background-color: var(--secondary-color);
+}
+
+header {
+    text-align: right;
+    padding: 0.5em 1em;
+}
+header > div {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.125em;
+    padding-bottom: 0.125em;
+}
+header h1 {
+    text-align: left;
+}
+header span,
+header a {
+    color: #ddd;
+}
+.header-profile {
+    height: 2em;
+}
+.header-profile a {
+    vertical-align: 50%;
+    margin-right: 1em;
+}
+.header-profile img {
+    width: 2em;
+    height: 2em;
+    background-color: white;
+    border-radius: 50%;
+}
+
+footer {
+    text-align: center;
+}
+
+main {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    background-color: var(--primary-color);
+}
+
+.wrapper {
+    max-width: 60em;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+.content {
+    background-color: var(--tertiary-color);
+    width: 70%;
+}
+.content-wrapper {
+    padding: 0.75em 2em;
+}
+.content-header {
+    background-color: var(--secondary-alt-color);
+    padding: 0.3125em 0.625em;
+    border-radius: 0.25em;
+    font-size: 1.375rem;
+    font-weight: bold;
+}
+.content-element {
+    background-color: var(--primary-alt-color);
+    color: #4d585c;
+    border-radius: 0.25em;
+}
+
+nav {
+    width: 30%;
+    font-size: 1.5rem;
+}
+nav ul {
+    list-style: none;
+}
+nav li {
+    border: 1px solid white;
+    transition: 0.0625s background-color;
+}
+nav li:hover {
+    background-color: #fff4;
+}
+nav ul ul {
+    font-size: 1.25rem;
+    margin-left: 2em;
+}
+nav a,
+nav label {
+    display: block;
+    padding: 0.375em 0.75em;
+    color: var(--tertiary-color);
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-separate {
+    border-collapse: separate;
+    border-spacing: 0.25em 0.375em;
+}
+thead {
+    background-color: var(--secondary-alt-color);
+}
+th,
+td {
+    padding: 0.375em;
+    border-radius: 0.25em;
+}
+td:first-child.table-join {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+td:last-child.table-join {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+td:not(:last-child):not(:first-child).table-join {
+    border-radius: 0;
+}
+td.table-join {
+    color: #6b7375;
+    background-color: unset;
+}
+tr.table-join:nth-child(odd) {
+    background-color: var(--primary-alt-color);
+}
+tr.table-join:nth-child(even) {
+    background-color: #bfc3c5;
+}
+th {
+    text-align: left;
+}
+td {
+    color: var(--secondary-alt-color);
+    background-color: #fff;
+}
+td.dark {
+    color: white;
+    background-color: #a2a9ab;
+}
+td input,
+td select,
+th input,
+th select {
+    width: 100%;
+    height: 100%;
+}
+
+.login {
+    width: 100%;
+    max-width: 16em;
+    margin: 2em auto;
+    align-self: center;
+    border-radius: 0.25em;
+    background-color: var(--tertiary-color);
+    text-align: center;
+}
+.login-header {
+    position: relative;
+    min-height: 4em;
+    background-color: var(--secondary-color);
+    margin-bottom: 2.5em;
+    border-radius: 0.25em;
+    text-align: center;
+}
+.login-header::before,
+.login-header::after {
+    content: '';
+    position: absolute;
+    top: 1.25em;
+    width: 1.25em;
+    height: 1.25em;
+    background-color: #ccc;
+}
+.login-header::before {
+    left: 1em;
+}
+.login-header::after {
+    right: 1em;
+}
+.login-profile,
+.register-profile {
+    position: absolute;
+    bottom: -1.5em;
+    width: 100%;
+    max-width: 16em;
+}
+.register-profile {
+    max-width: 20em;
+}
+.login-profile img,
+.register-profile img {
+    margin: auto;
+    width: 3em;
+    height: 3em;
+    border-radius: 50%;
+    background-color: #fff;
+}
+.register {
+    max-width: 20em;
+    text-align: left;
+}
+.register-login {
+    text-align: center;
+}
+.login form,
+.register form {
+    margin: 0 2em;
+}
+.login input,
+.register input {
+    font-size: 1.125rem;
+    padding: 0.25em 0.625em;
+    margin-bottom: 0.5em;
+    width: 100%;
+}
+.login label,
+.register label {
+    font-size: 1.125rem;
+}
+
+button,
+.link-button {
+    display: inline-block;
+    padding: 0.5em 2em;
+    color: white;
+    background-color: #999fa1;
+    border-style: none;
+    border-radius: 0.5em;
+    margin: 0 0.25em;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+button:hover,
+.link-button:hover {
+    background-color: #767b7c;
+}
+
+@media (max-width: 768px) {
+    main {
+        flex-direction: column;
+    }
+    .content {
+        width: 100%;
+    }
+    nav {
+        width: 100%;
+        font-size: 1.25em;
+    }
+}

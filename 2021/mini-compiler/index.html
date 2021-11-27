@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Compiler - Cat Language</title>
+</head>
+
+<body>
+  <main>
+    <h1>Mini Compiler</h1>
+    <h2>Cat Language</h2>
+    <br>
+    <h3>Input</h3>
+    <div>
+      <label for="input-text">Sentence:</label><br>
+      <textarea id="input-text" rows=2></textarea>
+    </div>
+    <br>
+    <h3>Output</h3>
+    <div class="split">
+      <div>
+        <label for="output-lexer">Lexical Analysis:</label><br>
+        <textarea id="output-lexer" rows=5 readonly></textarea>
+      </div>
+      <div>
+        <label for="output-syntax">Syntax Analysis:</label><br>
+        <textarea id="output-syntax" rows=5 readonly></textarea>
+      </div>
+    </div>
+    <br>
+    <div>
+      <label for="output-result">Result:</label><br>
+      <textarea id="output-result" rows=20 readonly></textarea>
+    </div>
+    <br>
+    <div>
+      Compile time: <span id="compile-time">0</span>ms<br>
+      <span id="compile-message"></span>
+    </div>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

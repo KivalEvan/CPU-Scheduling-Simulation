@@ -1,5 +1,13 @@
 {
     "files.associations": {
-        "math.h": "c"
+        "math.h": "c",
+        "array": "c",
+        "omp.h": "c",
+        "hash_map": "c",
+        "string_view": "c",
+        "format": "c",
+        "initializer_list": "c",
+        "span": "c",
+        "valarray": "c"
     }
 }

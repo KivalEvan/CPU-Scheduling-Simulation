@@ -1,7 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <omp.h>
 
 #define ARRAYSIZE ('Z' - 'A' + 1)
 int main(int argc, char *argv[]) {
@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     int i, count[ARRAYSIZE] = {0};
     long int size;
     char *buffer;
-    clock_t start, end;
+    double start, end;
     infile = fopen(argv[1], "r");
     if (infile) {
         fseek(infile, 0L, SEEK_END);  // Find out the
@@ -20,13 +20,14 @@ int main(int argc, char *argv[]) {
         // file into the
         fread(buffer, 1, size, infile);
         // buffer.
-        start = clock();
+        start = omp_get_wtime();
+#pragma omp parallel for reduction(+:buffer[:size])
         for (i = 0; i < size; i++)
             if (isalpha(buffer[i]))
                 count[tolower(buffer[i]) - 'a']++;
-        end = clock();
-        printf("CPU time used: %f seconds\n",
-               ((double)(end - start)) / CLOCKS_PER_SEC);
+        end = omp_get_wtime();
+
+        printf("CPU time used: %f seconds\n", end - start);
         for (i = 0; i < ARRAYSIZE; i++)
             printf("%c %d\n", i + 'A', count[i]);
     } else

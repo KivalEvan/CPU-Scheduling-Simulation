@@ -42,6 +42,7 @@ complex mapPoint(int width, int height, double radius, int x, int y) {
 void juliaSet(int width, int height, complex c, double radius, int n) {
     int x, y, i;
     complex z0, z1;
+#pragma omp parallel for collapse(2)
     for (x = 0; x < width; x++)
         for (y = 0; y < height; y++) {
             z0 = mapPoint(width, height, radius, x, y);
@@ -75,7 +76,9 @@ int main(int argC, char *argV[]) {
 
 void allocatePicture(int width, int height) {
     picture = (int **)malloc(sizeof(int *) * height);
-    for (int i = 0; i < height; i++)
+    int i;
+#pragma omp parallel for shared(i)
+    for (i = 0; i < height; i++)
         picture[i] = (int *)malloc(sizeof(int) * width);
 }
 

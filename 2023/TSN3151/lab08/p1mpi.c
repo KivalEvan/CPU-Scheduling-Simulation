@@ -28,13 +28,13 @@ int main(int argc, char *argv[]) {
     // step length (width of each trapezoid)
     w = (b - a) / n;
 
-    int startIndex = n / np * p + 1;
+    int startIndex = n / np * p;
     int endIndex = n / np * (p + 1);
     if (p == (np - 1)) endIndex += n % np;
 
     // Initialize the heights
-    y[(startIndex - 1) % 2] = f(a + (startIndex - 1) * w);
-    for (i = startIndex; i <= endIndex; i++) {
+    y[startIndex % 2] = f(a + startIndex * w);
+    for (i = startIndex + 1; i <= endIndex; i++) {
         y[i % 2] = f(a + i * w);
         sum += y[i % 2] + y[(i + 1) % 2];
     }

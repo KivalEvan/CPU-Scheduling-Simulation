@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     scanf("%d", &partitions);
     slice = (END - START) / partitions;
+#pragma omp parallel for shared(x)
     for (x = START + (slice / 2); x < END; x = x + slice)
         total = total + f(x);
     total = total * slice;

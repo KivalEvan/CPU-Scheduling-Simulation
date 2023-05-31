@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
         fread(buffer, 1, size, infile);
         // buffer.
         start = omp_get_wtime();
-#pragma omp parallel for reduction(+:buffer[:size])
+#pragma omp parallel for reduction(+:count[:ARRAYSIZE])
         for (i = 0; i < size; i++)
             if (isalpha(buffer[i]))
                 count[tolower(buffer[i]) - 'a']++;

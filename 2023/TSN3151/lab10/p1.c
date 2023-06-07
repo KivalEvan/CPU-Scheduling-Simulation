@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-float params[] = {0, 1920, 1080, -0.70174, 0.156, 1.2, 500};
+float params[] = {0, 8000, 4000, -0.70174, 0.156, 1.2, 500};
 #define TEMPFILE "temp.pgm"
 #define MAXPIXEL 16
 int **picture;

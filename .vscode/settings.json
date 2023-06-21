@@ -8,6 +8,27 @@
         "format": "c",
         "initializer_list": "c",
         "span": "c",
-        "valarray": "c"
+        "valarray": "c",
+        "chrono": "c",
+        "random": "c",
+        "limits": "c",
+        "semaphore": "c",
+        "algorithm": "c",
+        "string.h": "c",
+        "functional": "c",
+        "charconv": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "*.tcc": "c",
+        "future": "c",
+        "compare": "c",
+        "numeric": "c",
+        "streambuf": "c",
+        "complex": "c",
+        "sstream": "c"
     }
 }

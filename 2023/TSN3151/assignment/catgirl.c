@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PRINT_STEP 1
 #define BUFFER_SIZE 256
 #define BUCKET_SIZE 2048
 char testName[3][BUFFER_SIZE] =
@@ -23,11 +24,6 @@ struct environment {
    int size;
 };
 
-struct string_chunk {
-   char* str;
-   size_t size;
-};
-
 struct node {
    char key[BUFFER_SIZE];
    size_t value;
@@ -36,9 +32,10 @@ struct node {
 
 struct hash_map {
    struct node* bucket[BUCKET_SIZE];
+   size_t size;
 };
 
-struct node* node_init(char* key, size_t val) {
+struct node* node_init(const char* key, const size_t val) {
    struct node* n = malloc(sizeof(struct node));
    strcpy(n->key, key);
    n->value = val;
@@ -46,19 +43,20 @@ struct node* node_init(char* key, size_t val) {
    return n;
 }
 
-void node_add(struct node* n, char* str, size_t val) {
+size_t node_add(struct node* n, const char* str, const size_t val) {
    if (!strcmp(n->key, str)) {
       n->value += val;
-      return;
+      return 0;
    }
    if (n->next)
-      node_add(n->next, str, val);
+      return node_add(n->next, str, val);
    else
       n->next = node_init(str, val);
+   return 1;
 }
 
 // djb2 hash, source: http://www.cse.yorku.ca/~oz/hash.html
-size_t hash(char* str) {
+size_t hash(const char* str) {
    size_t hash = 5381;
    int c;
 
@@ -68,19 +66,26 @@ size_t hash(char* str) {
    return hash;
 }
 
-struct node* hashmap_getorcreate(struct hash_map* hashmap, char* str) {
+struct hash_map* hashmap_init() {
+   struct hash_map* h = malloc(sizeof(struct hash_map));
+   h->size = 0;
+   return h;
+}
+
+struct node* hashmap_getorcreate(struct hash_map* hashmap, const char* str) {
    int idx = hash(str) % BUCKET_SIZE;
    struct node* n = hashmap->bucket[idx];
-   if (n == NULL) {
+   if (!n) {
       n = node_init(str, 0);
       hashmap->bucket[idx] = n;
+      hashmap->size++;
    }
 
    return n;
 }
 
-void hashmap_add(struct hash_map* hashmap, char* str, size_t val) {
-   node_add(hashmap_getorcreate(hashmap, str), str, val);
+void hashmap_add(struct hash_map* hashmap, const char* str, const size_t val) {
+   hashmap->size += node_add(hashmap_getorcreate(hashmap, str), str, val);
 }
 
 size_t hashmap_size(struct hash_map* hashmap) {
@@ -97,9 +102,8 @@ size_t hashmap_size(struct hash_map* hashmap) {
    return size;
 }
 
-struct node** hashmap_to_array(struct hash_map* hashmap) {
-   size_t size = hashmap_size(hashmap) + 1;
-   struct node** aryNode = (struct node**)malloc(size * sizeof(struct node*));
+struct node** hashmap_to_array(const struct hash_map* hashmap) {
+   struct node** aryNode = (struct node**)malloc(hashmap->size * sizeof(struct node*));
    struct node* n;
    for (int i = 0, j = 0; i < BUCKET_SIZE; i++) {
       n = hashmap->bucket[i];
@@ -178,7 +182,7 @@ void slice(const char* src, char* dest, size_t start, size_t end) {
    strncpy(dest, src + start, end - start);
 }
 
-void openfile(MPI_File* fh, struct user_input* input, struct environment* env, int idx) {
+void openfile(MPI_File* fh, const struct user_input* input, const struct environment* env, const int idx) {
    if (!env->process) {
       strcpy(buffer, input->textFile[idx]);
    }
@@ -195,67 +199,68 @@ void openfile(MPI_File* fh, struct user_input* input, struct environment* env, i
 // so we'll go with naive approach for now:
 // process 0 read all the string, count text length by new line
 // and distribute string by line count evenly
-struct string_chunk* readfileanddistribute(MPI_File* fh, struct user_input* input, struct environment* env) {
-   struct string_chunk* chunk = malloc(sizeof(struct string_chunk));
+// downside with this approach is we do not know how long is the actual text per line
+// so we assume it is only 256 (buffer size limit) long
+char* readfileanddistribute(MPI_File* fh, const struct user_input* input, const struct environment* env) {
    MPI_Offset fileSize;
-   char *str, *sliced;
-   size_t *lineSize, localSize, size, part, leftover;
-   int i = 0, textLength = 0, localStart, localEnd;
+   char *str, *chunk;
+   size_t *lineSize, part, leftover;
+   int i = 0, lineNumber = 0, localSize, localStart, localEnd, start, end;
 
    if (!env->process) {
       MPI_File_get_size(*fh, &fileSize);
       str = (char*)malloc((fileSize) * sizeof(char));
       MPI_File_read(*fh, str, fileSize, MPI_CHAR, MPI_STATUS_IGNORE);
 
-      while (str[i++])
-         if (str[i] == '\n')
-            textLength++;
+      while (str[i])
+         if (str[i++] == '\n')
+            lineNumber++;
 
-      lineSize = malloc((textLength + 1) * sizeof(size_t));
-      lineSize[0] = 0;
-      i = 0;
-      textLength = 1;
+      lineSize = malloc((lineNumber + 1) * sizeof(size_t));
+      i = lineNumber = 0;
       while (str[i++])
          if (str[i] == '\n')
-            lineSize[textLength++] = i;
-      lineSize[textLength] = i - 1;
+            lineSize[lineNumber++] = i + 1;
+      lineSize[lineNumber] = i;
    }
 
-   part = textLength / env->size;
-   leftover = textLength % env->size;
+   lineNumber++;
+   part = lineNumber / env->size;
+   leftover = (lineNumber % env->size) - 1;
 
-   for (i = env->size - 1; i >= 0; i--) {
-      if (!env->process) {
-         localStart = part * i;
-         localEnd = part * (i + 1);
-         if (i == env->size - 1) localEnd += leftover;
-         size = lineSize[localEnd] - lineSize[localStart];
-         sliced = (char*)malloc(size * sizeof(char));
-         slice(str, sliced, lineSize[localStart], lineSize[localEnd]);
+   if (!env->process) {
+      for (i = env->size - 1; i >= 0; i--) {
+         start = part * i;
+         end = part * (i + 1);
+         if (i == env->size - 1 && leftover > 0) end += leftover;
+
+         localStart = lineSize[start];
+         if (!i) localStart = 0;
+         localEnd = lineSize[end];
+
+         localSize = localEnd - localStart + 1;
+         chunk = (char*)malloc((localSize + 1) * sizeof(char));
+         slice(str, chunk, localStart, localEnd);
+         chunk[localSize] = '\0';
          if (i) {
-            MPI_Send(&size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            MPI_Send(sliced, size, MPI_CHAR, i, 0, MPI_COMM_WORLD);
-         } else
-            localSize = size;
+            MPI_Send(&localSize, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(chunk, localSize, MPI_CHAR, i, 0, MPI_COMM_WORLD);
+         }
       }
-      if (i && i == env->process) {
-         MPI_Recv(&localSize, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-         sliced = (char*)malloc(localSize * sizeof(char));
-         MPI_Recv(sliced, localSize, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      }
+   } else {
+      MPI_Recv(&localSize, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      chunk = (char*)malloc(localSize * sizeof(char));
+      MPI_Recv(chunk, localSize, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
    }
-   chunk->str = sliced;
-   chunk->size = localSize;
 
    return chunk;
 }
 
-void filterandcountwords(struct string_chunk* chunk, struct hash_map* hashmap, struct user_input* input) {
+void filterandcountwords(const char* chunk, struct hash_map* hashmap, const struct user_input* input) {
    char c;
    int i = 0, j = 0;
    memset(buffer, 0, BUFFER_SIZE);
-   while (chunk->str[i]) {
-      c = chunk->str[i++];
+   while (c = chunk[i++]) {
       if (isalpha(c))
          buffer[j++] = tolower(c);
       else if (j) {
@@ -266,53 +271,53 @@ void filterandcountwords(struct string_chunk* chunk, struct hash_map* hashmap, s
    }
 }
 
-void aggregateresults(struct hash_map* hashmap, struct environment* env) {
-   int size;
+// as this is already divided, we can conquer
+void aggregateresults(struct hash_map* hashmap, const struct environment* env) {
+   int size, val;
    char key[BUFFER_SIZE];
    struct node* n;
-   int val;
-   for (int i = 1; i < env->size; i++) {
-      if (env->process && env->process != i) continue;
-      if (env->process) {
-         size = hashmap_size(hashmap);
-         MPI_Send(&size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-
-         for (int i = 0, j = 0; i < BUCKET_SIZE; i++) {
-            n = hashmap->bucket[i];
-            if (n != NULL) {
+   for (int next = 1, mod = 2; next < env->size; next *= 2, mod *= 2) {
+      if (env->process % mod) {
+         size = hashmap->size;
+         MPI_Send(&size, 1, MPI_INT, env->process - next, 0, MPI_COMM_WORLD);
+         for (int j = 0; j < BUCKET_SIZE; j++) {
+            n = hashmap->bucket[j];
+            if (n) {
                do {
-                  MPI_Send(&n->key, BUFFER_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-                  MPI_Send(&n->value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+                  MPI_Send(&n->key, BUFFER_SIZE, MPI_CHAR, env->process - next, 0, MPI_COMM_WORLD);
+                  MPI_Send(&n->value, 1, MPI_INT, env->process - next, 0, MPI_COMM_WORLD);
                } while (n = n->next);
             }
          }
+         break;
       } else {
-         MPI_Recv(&size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+         if (env->process + next >= env->size) continue;
+         MPI_Recv(&size, 1, MPI_INT, env->process + next, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
          for (int j = 0; j < size; j++) {
-            MPI_Recv(&key, BUFFER_SIZE, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            MPI_Recv(&val, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&key, BUFFER_SIZE, MPI_CHAR, env->process + next, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&val, 1, MPI_INT, env->process + next, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             hashmap_add(hashmap, key, val);
          }
       }
    }
 }
 
-void sortresults(struct node** nodes, struct user_input* input, size_t size) {
+void sortresults(struct node** nodes, const struct user_input* input, const size_t size) {
    switch (input->order) {
       case 'n':
-         printf("Sorting by numerical\n");
+         if (PRINT_STEP) printf("Sorting by numerical\n");
          qsort(nodes, size, sizeof(struct node*), val_comparator);
          break;
       case 'a':
-         printf("Sorting by alphabetical\n");
+         if (PRINT_STEP) printf("Sorting by alphabetical\n");
          qsort(nodes, size, sizeof(struct node*), alpha_comparator);
          break;
       default:
-         printf("Unknown input, no sorting is done\n");
+         if (PRINT_STEP) printf("Unknown input, no sorting is done\n");
    }
 }
 
-void printresults(struct node** nodes) {
+void printresults(struct node** nodes, const size_t size) {
    struct node* n;
    int i = 0;
    FILE* outfile = fopen("output.txt", "w");
@@ -320,7 +325,7 @@ void printresults(struct node** nodes) {
       fprintf(stderr, "Unable to open %s for writing.\n", "output.txt");
       exit(1);
    }
-   while (n = nodes[i++])
+   for (i = 0, n = nodes[i]; i < size; n = nodes[++i])
       fprintf(outfile, "%s: %d\n", n->key, n->value);
    fclose(outfile);
 }
@@ -334,8 +339,8 @@ int main(int argc, char* argv[]) {
    struct environment* env = malloc(sizeof(struct environment));
    MPI_File fh;
 
-   struct string_chunk* chunk;
-   struct hash_map* hashmap = malloc(sizeof(struct hash_map));
+   char* chunk;
+   struct hash_map* hashmap = hashmap_init();
    struct node** nodes;
 
    MPI_Init(&argc, &argv);
@@ -361,25 +366,25 @@ int main(int argc, char* argv[]) {
    }
 
    for (int i = 0; i < input->numOfFile; i++) {
-      if (!env->process) printf("Opening file input %s\n", input->textFile[i]);
+      if (!env->process && PRINT_STEP) printf("Opening file %s\n", input->textFile[i]);
       openfile(&fh, input, env, i);
-      if (!env->process) printf("Reading and distributing string\n");
+      if (!env->process && PRINT_STEP) printf("Reading and distributing string\n");
       chunk = readfileanddistribute(&fh, input, env);
-      if (!env->process) printf("Finished reading file %s\n", input->textFile[i]);
+      if (!env->process && PRINT_STEP) printf("Closing file %s\n", input->textFile[i]);
       closefile(&fh);
-      if (!env->process) printf("Filtering and counting words\n");
+      if (!env->process && PRINT_STEP) printf("Filtering and counting words\n");
       filterandcountwords(chunk, hashmap, input);
    }
 
-   if (!env->process) printf("Aggregating results\n");
+   if (!env->process && PRINT_STEP) printf("Aggregating results\n");
    aggregateresults(hashmap, env);
    if (!env->process) {
-      printf("Converting hashmap to array results\n");
+      if (PRINT_STEP) printf("Converting hashmap to array results\n");
       nodes = hashmap_to_array(hashmap);
-      printf("Sorting results\n");
-      sortresults(nodes, input, hashmap_size(hashmap));
-      printf("Printing results\n");
-      printresults(nodes);
+      if (PRINT_STEP) printf("Sorting results\n");
+      sortresults(nodes, input, hashmap->size);
+      if (PRINT_STEP) printf("Printing results\n");
+      printresults(nodes, hashmap->size);
    }
 
    MPI_Finalize();

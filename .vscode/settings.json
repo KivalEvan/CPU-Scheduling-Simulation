@@ -29,6 +29,13 @@
         "numeric": "c",
         "streambuf": "c",
         "complex": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "deque": "c",
+        "forward_list": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "unordered_set": "c",
+        "vector": "c"
     }
 }

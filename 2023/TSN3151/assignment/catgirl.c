@@ -155,6 +155,11 @@ void getinput(struct user_input* input) {
    printf("Enter the number of text files: ");
    fflush(stdout);
    scanf("%d", &input->numOfFile);
+   if (!(input->numOfFile > 0)) {
+      fprintf(stderr, "Number of file input must be more than 0\n");
+      exit(2);
+      MPI_Finalize();
+   }
 
    input->textFile = (char**)malloc(input->numOfFile * sizeof(char*));
    for (int i = 0; i < input->numOfFile; i++) {
@@ -172,6 +177,10 @@ void getinput(struct user_input* input) {
    printf("Enter the maximum length of word: ");
    fflush(stdout);
    scanf("%d", &input->max);
+   if (input->max > BUFFER_SIZE) {
+      printf("Maximum length cannot be more than %d, reducing to %d\n", BUFFER_SIZE - 1, BUFFER_SIZE - 1);
+      input->max = BUFFER_SIZE - 1;
+   }
 
    printf("Enter 'a' for alphabetical order or 'n' for number of words order: ");
    fflush(stdout);
@@ -190,7 +199,7 @@ void openfile(MPI_File* fh, const struct user_input* input, const struct environ
    if (MPI_File_open(MPI_COMM_WORLD, buffer, MPI_MODE_RDONLY, MPI_INFO_NULL, fh)) {
       if (!env->process) fprintf(stderr, "Couldn't open file %s\n", buffer);
       MPI_Finalize();
-      exit(2);
+      exit(3);
    }
 }
 
@@ -261,7 +270,7 @@ void filterandcountwords(const char* chunk, struct hash_map* hashmap, const stru
    int i = 0, j = 0;
    memset(buffer, 0, BUFFER_SIZE);
    while (c = chunk[i++]) {
-      if (isalpha(c))
+      if (isalpha(c) && j < BUFFER_SIZE)
          buffer[j++] = tolower(c);
       else if (j) {
          if (j >= input->min && j <= input->max) hashmap_add(hashmap, buffer, 1);
@@ -323,7 +332,7 @@ void printresults(struct node** nodes, const size_t size) {
    FILE* outfile = fopen("output.txt", "w");
    if (!outfile) {
       fprintf(stderr, "Unable to open %s for writing.\n", "output.txt");
-      exit(1);
+      exit(4);
    }
    for (i = 0, n = nodes[i]; i < size; n = nodes[++i])
       fprintf(outfile, "%s: %d\n", n->key, n->value);
